@@ -1,0 +1,106 @@
+/* Fill-in information from Blynk Device Info here */
+#define BLYNK_TEMPLATE_ID "TMPL6wWLbq8mI"
+#define BLYNK_TEMPLATE_NAME "Gas Deteksi"
+#define BLYNK_AUTH_TOKEN "pRAuDir_45hoz2DxISS0YEcD1rQ3kQoD"
+
+/* Comment this out to disable prints and save space */
+#define BLYNK_PRINT Serial
+
+
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <BlynkSimpleEsp32.h>
+int gas_sensor = 33;
+int relbuz = 18;
+int red = 27;
+int green = 25;
+int blue = 26;
+int threshold = 200;
+
+char auth[] = BLYNK_AUTH_TOKEN;
+// Your WiFi credentials.
+// Set password to "" for open networks.
+char ssid[] = "EKS03";  // type your wifi name
+char pass[] = "rajutku01";  // type your wifi password
+BlynkTimer timer;
+
+void sendSensor()
+{
+  // Request temperature to all devices on the data line
+  int gas_sensordata=analogRead(gas_sensor);
+  Serial.println("Gas sensor data: ");
+  Serial.println(gas_sensordata);
+  delay(1000);
+
+    Blynk.virtualWrite(V0, gas_sensordata);
+    delay(500);
+}
+
+void setup()
+{
+  // Debug console
+  Serial.begin(115200);
+  pinMode(gas_sensor, INPUT);
+  pinMode(relbuz, OUTPUT);
+  pinMode(red, OUTPUT);
+  pinMode(green, OUTPUT);
+  pinMode(blue, OUTPUT);
+  
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+  timer.setInterval(100L, sendSensor);
+  // You can also specify server:
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass, "blynk.cloud", 80);
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass, IPAddress(192,168,1,100), 8080);
+}
+
+void loop() 
+
+{ Blynk.run();
+  timer.run();
+  int gas_sensordata=analogRead(gas_sensor);
+  if (gas_sensordata > threshold)
+  {
+    digitalWrite(red, HIGH);
+    digitalWrite(relbuz, HIGH);
+    digitalWrite(blue, LOW);
+    digitalWrite(green, LOW); 
+  }  
+  else
+  {
+    digitalWrite(green, HIGH); 
+    digitalWrite(relbuz, LOW);
+    digitalWrite(red, LOW);
+    digitalWrite(blue, LOW);
+  } 
+  if(gas_sensordata < threshold) 
+  {
+    digitalWrite(blue, HIGH);
+    digitalWrite(relbuz, HIGH);
+    digitalWrite(red, LOW);
+    digitalWrite(green, LOW);
+  } 
+  else {
+  digitalWrite(red, LOW);
+  digitalWrite(relbuz, LOW);
+  digitalWrite(blue, LOW);
+  digitalWrite(green, LOW);
+  }
+  Blynk.run();
+  int gas_sensordata=analogRead(gas_sensor);
+  int flame_sensordata=analogRead(flame_sensor);
+  Serial.println("Gas sensor data: ");
+  Serial.println(gas_sensordata);
+  Serial.println("Flame sensor data: ");
+  Serial.println(flame_sensordata);
+  delay(1000);
+  
+  // You can send any value at any time.
+  // Please don't send more that 10 values per second.
+  //  Blynk.virtualWrite(V0, flame_sensordata);
+  //Blynk.virtualWrite(V0, gas_sensordata);
+  //delay(500);
+  //timer.run();
+  delay(1);
+    
+}
+
